@@ -20,12 +20,78 @@ const formatCurrency = (amount) => {
     return 'P' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
+// Firebase integration for bookings
+async function saveBookingToFirebase(bookingData) {
+    try {
+        const docRef = await db.collection('bookings').add({
+            ...bookingData,
+            status: 'confirmed',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            totalGuests: guestCount.adults + guestCount.children
+        });
+        
+        // Also save to reservations collection for admin
+        await db.collection('reservations').add({
+            ...bookingData,
+            status: 'confirmed',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            totalGuests: guestCount.adults + guestCount.children
+        });
+        
+        return docRef.id;
+    } catch (error) {
+        console.error('Error saving booking to Firebase:', error);
+        throw error;
+    }
+}
+
+async function getReservedDatesFromFirebase() {
+    try {
+        const snapshot = await db.collection('reservedDates').get();
+        const reservedDates = [];
+        snapshot.forEach(doc => {
+            reservedDates.push(doc.data());
+        });
+        return reservedDates;
+    } catch (error) {
+        console.error('Error loading reserved dates from Firebase:', error);
+        return [];
+    }
+}
+
+async function reserveDatesInFirebase(checkIn, checkOut) {
+    try {
+        await db.collection('reservedDates').add({
+            checkIn: checkIn.toISOString(),
+            checkOut: checkOut.toISOString(),
+            reservedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (error) {
+        console.error('Error reserving dates in Firebase:', error);
+        throw error;
+    }
+}
+
+// Save to localStorage as fallback
+function saveBookingToLocalStorage(bookingData) {
+    const storedBookings = localStorage.getItem('bookings');
+    const bookings = storedBookings ? JSON.parse(storedBookings) : [];
+    bookings.push({
+        ...bookingData,
+        id: Date.now().toString(),
+        status: 'confirmed'
+    });
+    localStorage.setItem('bookings', JSON.stringify(bookings));
+}
+
 function openGuestModal() {
     document.getElementById("guestModal").style.display = "flex";
 }
+
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = "none";
 }
+
 function updateGuestCounts(type, action) {
     let count = guestCount[type];
     const totalGuests = guestCount.adults + guestCount.children;
@@ -46,36 +112,26 @@ function updateGuestCounts(type, action) {
     document.getElementById(`${type}Count`).textContent = count;
     updateGuestButtonStates();
     updateSummaryDisplay();
-    updateDisplay(); // Recalculate total to include new guest fees
+    updateDisplay();
 }
 
 function updateGuestButtonStates() {
-    // Check total limit
     const totalGuests = guestCount.adults + guestCount.children;
     const disablePlus = totalGuests >= MAX_GUESTS;
 
-    // Adults buttons
     document.querySelector('.count-btn[data-type="adults"][data-action="plus"]').disabled = disablePlus;
     document.querySelector('.count-btn[data-type="adults"][data-action="minus"]').disabled = guestCount.adults <= MIN_ADULTS;
-
-    // Children buttons
     document.querySelector('.count-btn[data-type="children"][data-action="plus"]').disabled = disablePlus;
     document.querySelector('.count-btn[data-type="children"][data-action="minus"]').disabled = guestCount.children <= 0;
 }
-
-
-// --- SUMMARY DISPLAY & DATE LOGIC ---
 
 function updateSummaryDisplay() {
     const { checkIn, checkOut } = selectedDates;
     const dateFormat = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
 
-    // Update Guest Count
-    const adultLabel = guestCount.adults === 1 ? 'adult' : 'adults';
-    const childLabel = guestCount.children === 1 ? 'child' : 'children';
-    document.getElementById("guestCountDisplay").textContent = `${guestCount.adults} ${adultLabel}, ${guestCount.children} ${childLabel}`;
+    document.getElementById("guestCountDisplay").textContent = 
+        `${guestCount.adults} ${guestCount.adults === 1 ? 'adult' : 'adults'}, ${guestCount.children} ${guestCount.children === 1 ? 'child' : 'children'}`;
 
-    // Update Date Displays
     document.getElementById("checkInDisplay").textContent = checkIn 
         ? checkIn.toLocaleDateString('en-US', dateFormat)
         : 'Select Date';
@@ -88,23 +144,20 @@ function updateSummaryDisplay() {
 function highlightDateRange() {
     const allCells = document.querySelectorAll(".calendar td");
     allCells.forEach(cell => {
-           cell.classList.remove("selected", "range-highlight");
+        cell.classList.remove("selected", "range-highlight");
     });
     
     const { checkIn, checkOut } = selectedDates;
 
     if (!checkIn) return;
 
-    // Find and highlight check-in date
     const checkInCell = document.querySelector(`[data-date="${checkIn.toISOString().split('T')[0]}"]`);
     if (checkInCell) checkInCell.classList.add("selected");
 
     if (checkIn && checkOut) {
-        // Find and highlight check-out date
         const checkOutCell = document.querySelector(`[data-date="${checkOut.toISOString().split('T')[0]}"]`);
         if (checkOutCell) checkOutCell.classList.add("selected");
         
-        // Highlight range in between
         let currentDate = new Date(checkIn);
         currentDate.setDate(currentDate.getDate() + 1);
 
@@ -180,7 +233,6 @@ function renderTwoMonths() {
     const container = document.getElementById("calendarsContainer");
     container.innerHTML = '';
 
-    // Calculate the next month
     let nextMonth = currentMonth + 1;
     let nextYear = currentYear;
     if (nextMonth > 11) {
@@ -188,7 +240,6 @@ function renderTwoMonths() {
         nextYear++;
     }
 
-    // Create the two month containers
     const month1Div = document.createElement('div');
     month1Div.id = 'month1';
     month1Div.classList.add('calendar-month');
@@ -215,6 +266,7 @@ function selectDate(date) {
     } else if (checkIn && !checkOut) {
         if (date.getTime() === checkIn.getTime()) {
             selectedDates.checkIn = null;
+            selectedDates.checkOut = null;
         } else if (date < checkIn) {
             selectedDates.checkIn = date;
             selectedDates.checkOut = null;
@@ -223,14 +275,12 @@ function selectDate(date) {
         }
     }
 
-    // Update all displays
     renderTwoMonths(); 
     updateDisplay();
     updateSummaryDisplay(); 
 }
 
 function prevMonths() {
-    // Prevent navigating before the current real month
     if (currentYear === today.getFullYear() && currentMonth === today.getMonth()) {
         return; 
     }
@@ -241,7 +291,6 @@ function prevMonths() {
         currentYear--;
     }
     
-    // Safety check after decrementing
     if (currentYear < today.getFullYear() || (currentYear === today.getFullYear() && currentMonth < today.getMonth())) {
          currentMonth = today.getMonth();
          currentYear = today.getFullYear();
@@ -288,36 +337,28 @@ function updateDisplay() {
         count = nights;
     }
     
-    // --- START PRICE CALCULATION LOGIC ---
     let baseStayCost = 0;
     if (stayType && count > 0) {
-        // Base cost for the duration (number of days/nights)
         baseStayCost = STAY_PRICES[stayType] * count;
     }
     
-    // Calculate extra guest fees
     const totalGuests = guestCount.adults + guestCount.children;
     let extraGuests = Math.max(0, totalGuests - BASE_GUESTS);
-    
-    // Extra fees apply for *each* day/night of the stay
     let extraGuestCost = extraGuests * EXTRA_GUEST_FEE * Math.max(1, count);
     
     let totalAmount = baseStayCost + extraGuestCost;
-    // --- END PRICE CALCULATION LOGIC ---
-
+    
     document.getElementById("totalAmount").textContent = formatCurrency(totalAmount);
 }
 
-document.getElementById("stayType").addEventListener("change", updateDisplay);
-
-
-function confirmPayment() {
+async function confirmPayment() {
     const { checkIn, checkOut } = selectedDates;
     const stayType = document.getElementById("stayType").value;
     const paymentMethod = document.getElementById("paymentMethod").value;
     const accountNumber = document.getElementById("accountNumber").value;
     const totalAmount = document.getElementById("totalAmount").textContent;
 
+    // Validation
     if (!checkIn) {
         alert("Please select a Check-in date.");
         return;
@@ -327,7 +368,6 @@ function confirmPayment() {
         return;
     }
     
-    // Range Validation
     const requiresRange = stayType === 'night' || stayType === 'whole';
     if (requiresRange && !checkOut) {
         alert("For Night Tour and Whole Day Stay, please select both a Check-in and Check-out date.");
@@ -343,18 +383,58 @@ function confirmPayment() {
         return;
     }
 
+    // Prepare booking data
+    const bookingData = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("number").value,
+        guests: { ...guestCount },
+        checkIn: checkIn.toISOString().split('T')[0],
+        checkOut: checkOut ? checkOut.toISOString().split('T')[0] : null,
+        stayType: stayType,
+        totalAmount: totalAmount,
+        paymentMethod: paymentMethod,
+        accountNumber: accountNumber
+    };
+
+    try {
+        // Save to Firebase
+        const bookingId = await saveBookingToFirebase(bookingData);
+        
+        // Reserve dates
+        if (checkOut) {
+            await reserveDatesInFirebase(checkIn, checkOut);
+        }
+
+        // Show receipt
+        showReceipt(bookingData, bookingId);
+        
+    } catch (error) {
+        console.error('Error saving booking:', error);
+        // Fallback to localStorage
+        saveBookingToLocalStorage(bookingData);
+        showReceipt(bookingData, 'local-' + Date.now());
+    }
+}
+
+function showReceipt(bookingData, bookingId) {
     const details = `
-        <p><strong>Name:</strong> ${document.getElementById("name").value}</p>
-        <p><strong>Email:</strong> ${document.getElementById("email").value}</p>
-        <p><strong>Number:</strong> ${document.getElementById("number").value}</p>
-        <p><strong>Guests:</strong> ${guestCount.adults} adult(s), ${guestCount.children} child(ren)</p>
-        <p><strong>Check-in:</strong> ${checkIn.toDateString()}</p>
-        <p><strong>Check-out:</strong> ${checkOut ? checkOut.toDateString() : 'N/A'}</p>
-        <p><strong>Stay Type:</strong> ${stayType}</p>
-        <p><strong>Total Due:</strong> <span style="color:var(--accent-gold);">${totalAmount}</span></p>
+        <p><strong>Booking ID:</strong> ${bookingId}</p>
+        <p><strong>Name:</strong> ${bookingData.name}</p>
+        <p><strong>Email:</strong> ${bookingData.email}</p>
+        <p><strong>Phone:</strong> ${bookingData.phone}</p>
+        <p><strong>Guests:</strong> ${bookingData.guests.adults} adult(s), ${bookingData.guests.children} child(ren)</p>
+        <p><strong>Check-in:</strong> ${new Date(bookingData.checkIn).toDateString()}</p>
+        <p><strong>Check-out:</strong> ${bookingData.checkOut ? new Date(bookingData.checkOut).toDateString() : 'N/A'}</p>
+        <p><strong>Stay Type:</strong> ${bookingData.stayType}</p>
+        <p><strong>Total Due:</strong> <span style="color:var(--accent-gold);">${bookingData.totalAmount}</span></p>
         <hr style="border-color:#444; margin:10px 0;">
-        <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-        <p><strong>Account Number:</strong> ${accountNumber}</p>
+        <p><strong>Payment Method:</strong> ${bookingData.paymentMethod}</p>
+        <p><strong>Account Number:</strong> ${bookingData.accountNumber}</p>
+        <div style="background: #2a2a2a; padding: 15px; border-radius: 8px; margin-top: 15px;">
+            <p style="color: #4CAF50; font-weight: bold; text-align: center;">✅ Booking Confirmed!</p>
+            <p style="font-size: 12px; text-align: center; color: #ccc;">You will receive a confirmation email shortly.</p>
+        </div>
     `;
     document.getElementById("receiptDetails").innerHTML = details;
     document.getElementById("receiptModal").style.display = "flex";
@@ -363,8 +443,8 @@ function confirmPayment() {
 function isValidPhilippineMobile(number) {
     const s = number.replace(/\D/g, "");
     return (
-        /^09\d{9}$/.test(s) ||      
-        /^639\d{9}$/.test(s) ||     
+        /^09\d{9}$/.test(s) ||      
+        /^639\d{9}$/.test(s) ||     
         /^\+639\d{9}$/.test(number)
     );
 }
@@ -400,14 +480,11 @@ document.getElementById("step1Confirm").addEventListener("click", function () {
     document.getElementById("step2").classList.add("active");
 });
 
-
 document.addEventListener("DOMContentLoaded", () => {
-    // Event listener for the Guests summary item to open the modal
     const guestSummaryItem = document.querySelector('.summary-item:first-child');
     guestSummaryItem.classList.add('clickable');
     guestSummaryItem.addEventListener('click', openGuestModal);
 
-    // Event listeners for counter buttons
     document.querySelectorAll('.count-btn').forEach(button => {
         button.addEventListener('click', function() {
             const type = this.getAttribute('data-type');
@@ -416,9 +493,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Initial calls
     renderTwoMonths();
     updateDisplay();
     updateSummaryDisplay();
-    updateGuestButtonStates(); 
+    updateGuestButtonStates();
 });
+
+document.getElementById("stayType").addEventListener("change", updateDisplay);
