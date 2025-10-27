@@ -25,7 +25,6 @@
         <li class="nav-item">
           <a href="admin-login.html" class="nav-link text-white fw-bold">Admin!</a>
         </li>
-
       </ul>
     </div>
   </div>
@@ -167,127 +166,173 @@
   </div>
 </div>
 
+<!-- Firebase Scripts -->
+<!-- Firebase Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+// Firebase configuration for Everpeak Nature Camp
+const firebaseConfig = {
+    apiKey: "AIzaSyAvvhMpf_WitusAfR-sqI8pMLIAPqygOOY",
+    authDomain: "everpeak-df533.firebaseapp.com",
+    projectId: "everpeak-df533",
+    storageBucket: "everpeak-df533.firebasestorage.app",
+    messagingSenderId: "314009845647",
+    appId: "1:314009845647:web:60381fba9cbecb51c395fa",
+    measurementId: "G-0XEXF5JSZ8"
+};
+
+// Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Export Firebase services
+window.firebase = firebase;
+window.auth = auth;
+window.db = db;
+
+console.log("Firebase initialized successfully");
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-  function loadWebsiteData() {
-    const storedData = localStorage.getItem('everpeakWebsiteData');
-    if (storedData) {
-      return JSON.parse(storedData);
+// Enhanced data loading with Firebase
+async function loadWebsiteData() {
+    try {
+        // Try Firebase first
+        const doc = await db.collection('websiteData').doc('everpeakContent').get();
+        if (doc.exists) {
+            const firebaseData = doc.data();
+            localStorage.setItem('everpeakWebsiteData', JSON.stringify(firebaseData));
+            return firebaseData;
+        }
+    } catch (error) {
+        console.log('Firebase load failed, using localStorage:', error);
     }
-    return null;
-  }
-  function renderCarousel() {
-    const websiteData = loadWebsiteData();
+    
+    // Fallback to localStorage
+    const storedData = localStorage.getItem('everpeakWebsiteData');
+    return storedData ? JSON.parse(storedData) : null;
+}
+
+async function renderCarousel() {
+    const websiteData = await loadWebsiteData();
     const carouselContainer = document.getElementById('carouselContainer');
     
     if (!websiteData || !websiteData.carousel || websiteData.carousel.length === 0) {
-      carouselContainer.innerHTML = `
-        <div class="carousel-item active">
-          <img src="/WEBSYS/FinalProj/Carousel/Carousel3.jpg" alt="Everpeak Pool" class="d-block w-100">
-        </div>
-        <div class="carousel-item">
-          <img src="/WEBSYS/FinalProj/Carousel/Carousel5.jpg" alt="Everpeak Interior Room" class="d-block w-100">
-        </div>
-      `;
-      return;
+        carouselContainer.innerHTML = `
+            <div class="carousel-item active">
+                <img src="/WEBSYS/FinalProj/Carousel/Carousel3.jpg" alt="Everpeak Pool" class="d-block w-100">
+            </div>
+            <div class="carousel-item">
+                <img src="/WEBSYS/FinalProj/Carousel/Carousel5.jpg" alt="Everpeak Interior Room" class="d-block w-100">
+            </div>
+        `;
+        return;
     }
 
     carouselContainer.innerHTML = '';
     websiteData.carousel.forEach((image, index) => {
-      const carouselItem = document.createElement('div');
-      carouselItem.className = index === 0 ? 'carousel-item active' : 'carousel-item';
-      carouselItem.innerHTML = `
-        <img src="${image.url}" alt="${image.alt}" class="d-block w-100">
-      `;
-      carouselContainer.appendChild(carouselItem);
+        const carouselItem = document.createElement('div');
+        carouselItem.className = index === 0 ? 'carousel-item active' : 'carousel-item';
+        carouselItem.innerHTML = `
+            <img src="${image.url}" alt="${image.alt}" class="d-block w-100">
+        `;
+        carouselContainer.appendChild(carouselItem);
     });
-  }
-  function renderGallery() {
-    const websiteData = loadWebsiteData();
+}
+
+async function renderGallery() {
+    const websiteData = await loadWebsiteData();
     const galleryContainer = document.getElementById('galleryContainer');
     const modalGalleryContainer = document.getElementById('modalGalleryContainer');
     
     if (!websiteData || !websiteData.gallery || websiteData.gallery.length === 0) {
-      galleryContainer.innerHTML = `
-        <div class="col-lg-8">
-          <div class="img-holder">
-            <img src="/WEBSYS/FinalProj/Carousel/Carousel5.jpg" class="gallery-img rounded-4" alt="Main Camp Image" data-index="0">
-          </div>
-        </div>
-        <div class="col-lg-4 d-flex flex-column gap-3">
-          <div class="img-holder flex-fill">
-            <img src="/WEBSYS/FinalProj/Carousel/Carousel3.jpg" class="gallery-img rounded-4" alt="Right Top" data-index="1">
-          </div>
-          <div class="img-holder flex-fill position-relative show-more-wrapper" data-bs-toggle="modal" data-bs-target="#galleryModal">
-            <img src="/WEBSYS/FinalProj/Carousel/Carousel.jpg" class="gallery-img rounded-4" alt="Show More" data-index="2">
-            <div class="show-more-overlay">+ Show More</div>
-          </div>
-        </div>
-      `;
-      
-      modalGalleryContainer.innerHTML = `
-        <div class="carousel-item active">
-          <img src="/WEBSYS/FinalProj/Carousel/Carousel.jpg" class="d-block w-100 modal-img" alt="Main Camp Image">
-        </div>
-        <div class="carousel-item">
-          <img src="/WEBSYS/FinalProj/Carousel/Carousel3.jpg" class="d-block w-100 modal-img" alt="Right Top">
-        </div>
-        <div class="carousel-item">
-          <img src="/WEBSYS/FinalProj/Carousel/Pool.jpg" class="d-block w-100 modal-img" alt="Right Bottom">
-        </div>
-        <div class="carousel-item">
-          <img src="/WEBSYS/FinalProj/Carousel/Carousel5.jpg" class="d-block w-100 modal-img" alt="Extra 1">
-        </div>
-        <div class="carousel-item">
-          <img src="/WEBSYS/FinalProj/Carousel/Carousel4.jpg" class="d-block w-100 modal-img" alt="Extra 2">
-        </div>
-      `;
-      return;
+        galleryContainer.innerHTML = `
+            <div class="col-lg-8">
+                <div class="img-holder">
+                    <img src="/WEBSYS/FinalProj/Carousel/Carousel5.jpg" class="gallery-img rounded-4" alt="Main Camp Image" data-index="0">
+                </div>
+            </div>
+            <div class="col-lg-4 d-flex flex-column gap-3">
+                <div class="img-holder flex-fill">
+                    <img src="/WEBSYS/FinalProj/Carousel/Carousel3.jpg" class="gallery-img rounded-4" alt="Right Top" data-index="1">
+                </div>
+                <div class="img-holder flex-fill position-relative show-more-wrapper" data-bs-toggle="modal" data-bs-target="#galleryModal">
+                    <img src="/WEBSYS/FinalProj/Carousel/Carousel.jpg" class="gallery-img rounded-4" alt="Show More" data-index="2">
+                    <div class="show-more-overlay">+ Show More</div>
+                </div>
+            </div>
+        `;
+        
+        modalGalleryContainer.innerHTML = `
+            <div class="carousel-item active">
+                <img src="/WEBSYS/FinalProj/Carousel/Carousel.jpg" class="d-block w-100 modal-img" alt="Main Camp Image">
+            </div>
+            <div class="carousel-item">
+                <img src="/WEBSYS/FinalProj/Carousel/Carousel3.jpg" class="d-block w-100 modal-img" alt="Right Top">
+            </div>
+            <div class="carousel-item">
+                <img src="/WEBSYS/FinalProj/Carousel/Pool.jpg" class="d-block w-100 modal-img" alt="Right Bottom">
+            </div>
+            <div class="carousel-item">
+                <img src="/WEBSYS/FinalProj/Carousel/Carousel5.jpg" class="d-block w-100 modal-img" alt="Extra 1">
+            </div>
+            <div class="carousel-item">
+                <img src="/WEBSYS/FinalProj/Carousel/Carousel4.jpg" class="d-block w-100 modal-img" alt="Extra 2">
+            </div>
+        `;
+        return;
     }
+
     galleryContainer.innerHTML = '';
     const mainImages = websiteData.gallery.slice(0, 3);
     
     mainImages.forEach((image, index) => {
-      if (index === 0) {
-        const mainCol = document.createElement('div');
-        mainCol.className = 'col-lg-8';
-        mainCol.innerHTML = `
-          <div class="img-holder">
-            <img src="${image.url}" class="gallery-img rounded-4" alt="${image.alt}" data-index="${index}">
-          </div>
-        `;
-        galleryContainer.appendChild(mainCol);
-      } else {
-        const sideCol = galleryContainer.querySelector('.col-lg-4') || document.createElement('div');
-        if (!sideCol.classList.contains('col-lg-4')) {
-          sideCol.className = 'col-lg-4 d-flex flex-column gap-3';
-          galleryContainer.appendChild(sideCol);
+        if (index === 0) {
+            const mainCol = document.createElement('div');
+            mainCol.className = 'col-lg-8';
+            mainCol.innerHTML = `
+                <div class="img-holder">
+                    <img src="${image.url}" class="gallery-img rounded-4" alt="${image.alt}" data-index="${index}">
+                </div>
+            `;
+            galleryContainer.appendChild(mainCol);
+        } else {
+            const sideCol = galleryContainer.querySelector('.col-lg-4') || document.createElement('div');
+            if (!sideCol.classList.contains('col-lg-4')) {
+                sideCol.className = 'col-lg-4 d-flex flex-column gap-3';
+                galleryContainer.appendChild(sideCol);
+            }
+            
+            const imgHolder = document.createElement('div');
+            imgHolder.className = index === 2 ? 'img-holder flex-fill position-relative show-more-wrapper' : 'img-holder flex-fill';
+            imgHolder.setAttribute('data-bs-toggle', 'modal');
+            imgHolder.setAttribute('data-bs-target', '#galleryModal');
+            imgHolder.innerHTML = `
+                <img src="${image.url}" class="gallery-img rounded-4" alt="${image.alt}" data-index="${index}">
+                ${index === 2 ? '<div class="show-more-overlay">+ Show More</div>' : ''}
+            `;
+            sideCol.appendChild(imgHolder);
         }
-        
-        const imgHolder = document.createElement('div');
-        imgHolder.className = index === 2 ? 'img-holder flex-fill position-relative show-more-wrapper' : 'img-holder flex-fill';
-        imgHolder.setAttribute('data-bs-toggle', 'modal');
-        imgHolder.setAttribute('data-bs-target', '#galleryModal');
-        imgHolder.innerHTML = `
-          <img src="${image.url}" class="gallery-img rounded-4" alt="${image.alt}" data-index="${index}">
-          ${index === 2 ? '<div class="show-more-overlay">+ Show More</div>' : ''}
-        `;
-        sideCol.appendChild(imgHolder);
-      }
     });
+
     modalGalleryContainer.innerHTML = '';
     websiteData.gallery.forEach((image, index) => {
-      const modalItem = document.createElement('div');
-      modalItem.className = index === 0 ? 'carousel-item active' : 'carousel-item';
-      modalItem.innerHTML = `
-        <img src="${image.url}" class="d-block w-100 modal-img" alt="${image.alt}">
-      `;
-      modalGalleryContainer.appendChild(modalItem);
+        const modalItem = document.createElement('div');
+        modalItem.className = index === 0 ? 'carousel-item active' : 'carousel-item';
+        modalItem.innerHTML = `
+            <img src="${image.url}" class="d-block w-100 modal-img" alt="${image.alt}">
+        `;
+        modalGalleryContainer.appendChild(modalItem);
     });
-  }
-  function renderContent() {
-    const websiteData = loadWebsiteData();
+}
+
+async function renderContent() {
+    const websiteData = await loadWebsiteData();
     if (!websiteData || !websiteData.content) return;
 
     const content = websiteData.content;
@@ -297,41 +342,45 @@
     if (content.location) document.getElementById('contentLocation').textContent = content.location;
     if (content.title) document.getElementById('mainTitle').textContent = content.title;
     if (content.tagline) document.getElementById('mainTagline').textContent = content.tagline;
+    
     if (content.amenitiesLeft) {
-      const amenitiesLeft = document.getElementById('amenitiesLeft');
-      amenitiesLeft.innerHTML = content.amenitiesLeft.split('\n').map(item => 
-        `<li><i class="bi bi-check-circle"></i> ${item}</li>`
-      ).join('');
+        const amenitiesLeft = document.getElementById('amenitiesLeft');
+        amenitiesLeft.innerHTML = content.amenitiesLeft.split('\n').map(item => 
+            `<li><i class="bi bi-check-circle"></i> ${item}</li>`
+        ).join('');
     }
     
     if (content.amenitiesRight) {
-      const amenitiesRight = document.getElementById('amenitiesRight');
-      amenitiesRight.innerHTML = content.amenitiesRight.split('\n').map(item => 
-        `<li><i class="bi bi-check-circle"></i> ${item}</li>`
-      ).join('');
+        const amenitiesRight = document.getElementById('amenitiesRight');
+        amenitiesRight.innerHTML = content.amenitiesRight.split('\n').map(item => 
+            `<li><i class="bi bi-check-circle"></i> ${item}</li>`
+        ).join('');
     }
+    
     if (content.accessLeft) {
-      const accessLeft = document.getElementById('accessLeft');
-      accessLeft.innerHTML = content.accessLeft.split('\n').map(item => 
-        `<li><i class="bi bi-check-circle"></i> ${item}</li>`
-      ).join('');
+        const accessLeft = document.getElementById('accessLeft');
+        accessLeft.innerHTML = content.accessLeft.split('\n').map(item => 
+            `<li><i class="bi bi-check-circle"></i> ${item}</li>`
+        ).join('');
     }
     
     if (content.accessRight) {
-      const accessRight = document.getElementById('accessRight');
-      accessRight.innerHTML = content.accessRight.split('\n').map(item => 
-        `<li><i class="bi bi-check-circle"></i> ${item}</li>`
-      ).join('');
+        const accessRight = document.getElementById('accessRight');
+        accessRight.innerHTML = content.accessRight.split('\n').map(item => 
+            `<li><i class="bi bi-check-circle"></i> ${item}</li>`
+        ).join('');
     }
+    
     if (content.transportation) {
-      const transportContainer = document.getElementById('transportationContainer');
-      transportContainer.innerHTML = content.transportation.split(',').map(item => 
-        `<span class="badge bg-light text-dark border">${item.trim()}</span>`
-      ).join('');
+        const transportContainer = document.getElementById('transportationContainer');
+        transportContainer.innerHTML = content.transportation.split(',').map(item => 
+            `<span class="badge bg-light text-dark border">${item.trim()}</span>`
+        ).join('');
     }
-  }
-  function renderFooter() {
-    const websiteData = loadWebsiteData();
+}
+
+async function renderFooter() {
+    const websiteData = await loadWebsiteData();
     if (!websiteData || !websiteData.footer) return;
 
     const footer = websiteData.footer;
@@ -341,44 +390,45 @@
     if (footer.copyright) document.getElementById('copyrightText').textContent = footer.copyright;
     
     if (footer.facebookUrl) {
-      const facebookLink = document.getElementById('facebookLink');
-      facebookLink.href = footer.facebookUrl;
+        const facebookLink = document.getElementById('facebookLink');
+        facebookLink.href = footer.facebookUrl;
     }
-  }
+}
 
-  document.addEventListener('DOMContentLoaded', function() {
-    renderCarousel();
-    renderGallery();
-    renderContent();
-    renderFooter();
+document.addEventListener('DOMContentLoaded', async function() {
+    await renderCarousel();
+    await renderGallery();
+    await renderContent();
+    await renderFooter();
+    
     setTimeout(() => {
-      document.querySelectorAll('.gallery-img').forEach(function(img) {
-        img.addEventListener('click', function() {
-          const index = this.getAttribute('data-index');
-          const modal = new bootstrap.Modal(document.getElementById('galleryModal'));
-          const carousel = new bootstrap.Carousel(document.getElementById('galleryCarousel'));
-          carousel.to(parseInt(index));
-          modal.show();
+        document.querySelectorAll('.gallery-img').forEach(function(img) {
+            img.addEventListener('click', function() {
+                const index = this.getAttribute('data-index');
+                const modal = new bootstrap.Modal(document.getElementById('galleryModal'));
+                const carousel = new bootstrap.Carousel(document.getElementById('galleryCarousel'));
+                carousel.to(parseInt(index));
+                modal.show();
+            });
         });
-      });
     }, 100);
-  });
+});
 
-  window.addEventListener('load', function() {
+window.addEventListener('load', function() {
     setTimeout(function() {
-      document.getElementById('promoPopup').classList.add('show');
+        document.getElementById('promoPopup').classList.add('show');
     }, 1000);
-  });
+});
 
-  function closePopup() {
+function closePopup() {
     document.getElementById('promoPopup').classList.remove('show');
-  }
-  
-  document.getElementById('promoPopup').addEventListener('click', function(e) {
+}
+
+document.getElementById('promoPopup').addEventListener('click', function(e) {
     if (e.target === this) {
-      closePopup();
+        closePopup();
     }
-  });
+});
 </script>
 
 </body>
