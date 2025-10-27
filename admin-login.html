@@ -19,8 +19,8 @@
             
             <form class="login-form" id="staffLoginForm">
                 <div class="form-group">
-                    <label for="staffId">Staff ID</label>
-                    <input type="text" id="staffId" class="form-control" placeholder="Enter your staff ID" required>
+                    <label for="staffId">Staff Email</label>
+                    <input type="email" id="staffId" class="form-control" placeholder="Enter your staff email" required>
                 </div>
                 
                 <div class="form-group">
@@ -31,21 +31,43 @@
                 <button type="submit" class="login-btn">Login to Staff Portal</button>
                 
                 <div class="error-message" id="errorMessage">
-                    Invalid ID or password. Please try again.
+                    Invalid email or password. Please try again.
                 </div>
             </form>
             
-
-             <div class="login-footer">
+            <div class="login-footer">
                 <p>Authorized personnel only.</p>
             </div>
-</div>
-</div>
+        </div>
+    </div>
 
-<script src="login.js"></script>
-</body>
-</html>
+<!-- Firebase Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+// Firebase configuration for Everpeak Nature Camp
+const firebaseConfig = {
+    apiKey: "AIzaSyAvvhMpf_WitusAfR-sqI8pMLIAPqygOOY",
+    authDomain: "everpeak-df533.firebaseapp.com",
+    projectId: "everpeak-df533",
+    storageBucket: "everpeak-df533.firebasestorage.app",
+    messagingSenderId: "314009845647",
+    appId: "1:314009845647:web:60381fba9cbecb51c395fa",
+    measurementId: "G-0XEXF5JSZ8"
+};
 
+// Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
+// Export Firebase services
+window.firebase = firebase;
+window.auth = auth;
+window.db = db;
+
+console.log("Firebase initialized successfully");
+</script>
 </body>
 </html>
