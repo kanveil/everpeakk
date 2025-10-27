@@ -1,33 +1,42 @@
 document.addEventListener("DOMContentLoaded", () => {
     const loginForm = document.getElementById("staffLoginForm");
     const errorMessage = document.getElementById("errorMessage");
-    const validStaffAccounts = [
-        { id: "admin001", password: "Everpeak2025!", role: "admin" },
-        { id: "staff001", password: "Staff123!", role: "staff" },
-        { id: "manager001", password: "Manager2025!", role: "manager" }
-    ];
 
-    loginForm.addEventListener("submit", (e) => {
+    // Check if user is already logged in
+    auth.onAuthStateChanged((user) => {
+        if (user && window.location.pathname.includes("admin-login.html")) {
+            window.location.href = "admin-design.html";
+        }
+    });
+
+    loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         
-        const staffId = document.getElementById("staffId").value.trim();
+        const staffEmail = document.getElementById("staffId").value.trim();
         const password = document.getElementById("password").value;
-        const staffAccount = validStaffAccounts.find(account => 
-            account.id === staffId && account.password === password
-        );
-        
-        if (staffAccount) {
+
+        try {
+            // Sign in with Firebase Auth
+            const userCredential = await auth.signInWithEmailAndPassword(staffEmail, password);
+            const user = userCredential.user;
+
+            // Store session in localStorage for quick access
             const staffSession = {
-                id: staffAccount.id,
-                role: staffAccount.role,
+                uid: user.uid,
+                email: user.email,
                 loginTime: new Date().toISOString(),
                 isAuthenticated: true
             };
+            
             localStorage.setItem("staffSession", JSON.stringify(staffSession));
             window.location.href = "admin-design.html";
-        } else {
+            
+        } catch (error) {
+            console.error("Login error:", error);
+            errorMessage.textContent = "Invalid email or password. Please try again.";
             errorMessage.style.display = "block";
             document.getElementById("password").value = "";
+            
             setTimeout(() => {
                 errorMessage.style.display = "none";
             }, 3000);
@@ -35,10 +44,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// Enhanced auth check function
 function checkStaffAuth() {
     const staffSession = localStorage.getItem("staffSession");
+    const user = auth.currentUser;
     
-    if (!staffSession) {
+    if (!staffSession || !user) {
         window.location.href = "admin-login.html";
         return null;
     }
@@ -50,19 +61,20 @@ function checkStaffAuth() {
         const hoursDiff = (currentTime - loginTime) / (1000 * 60 * 60);
         
         if (hoursDiff > 24) {
-            localStorage.removeItem("staffSession");
-            window.location.href = "admin-login.html";
+            staffLogout();
             return null;
         }
         
         return session;
     } catch (error) {
-        localStorage.removeItem("staffSession");
-        window.location.href = "admin-login.html";
+        staffLogout();
         return null;
     }
 }
+
 function staffLogout() {
-    localStorage.removeItem("staffSession");
-    window.location.href = "admin-login.html";
+    auth.signOut().then(() => {
+        localStorage.removeItem("staffSession");
+        window.location.href = "admin-login.html";
+    });
 }
