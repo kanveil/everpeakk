@@ -17,8 +17,20 @@
   ],
   "routes": [
     {
+      "src": "/",
+      "dest": "/index.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }
-  ]
+  ],
+  "env": {
+    "FIREBASE_API_KEY": "AIzaSyAvvhMpf_WitusAfR-sqI8pMLIAPqygOOY",
+    "FIREBASE_AUTH_DOMAIN": "everpeak-df533.firebaseapp.com",
+    "FIREBASE_PROJECT_ID": "everpeak-df533",
+    "FIREBASE_STORAGE_BUCKET": "everpeak-df533.firebasestorage.app",
+    "FIREBASE_MESSAGING_SENDER_ID": "314009845647",
+    "FIREBASE_APP_ID": "1:314009845647:web:60381fba9cbecb51c395fa"
+  }
 }
