@@ -1,5 +1,28 @@
+// Global variables
+let websiteData = {
+    carousel: [],
+    gallery: [],
+    content: {
+        title: "Everpeak",
+        price: "Starts at ₱8,400.00/night",
+        tagline: "Your one step to tranquility 🌴",
+        location: "Purok 6, Pintong Bocaue, San Mateo Rizal, San Mateo, Philippines",
+        amenitiesLeft: "Mountain View\nSea of Clouds (Seasonal)\nStar Gazing (Seasonal)\nDipping Pool with Jacuzzi\nTable Tennis\nBingo\nGazebo",
+        amenitiesRight: "Unlimited Videoko\nUnlimited Wifi\nNetflix\nBilliards\nBluetooth Speakers\nTwo Pool Bed",
+        accessLeft: "Sofabed and Airbeds\nFour Camping Tent\n55\" TV for Netflix and Karaoke\nKitchenwares and Utensils\nRefrigerator\nNo Corkage Fee",
+        accessRight: "Free Use of Griller (bring own charcoal)\nToilet and Bathroom\nFully Functional Kitchen\nHot and Cold Water Dispenser\nDinnerwares\nFree One Gallon of Mineral Water",
+        transportation: "Bike, Motorcycle, Sedan, SUV"
+    },
+    footer: {
+        title: "Everpeak Philippines",
+        description: "Connects campers to campgrounds and stores, making every camping adventure seamless and memorable.",
+        facebookUrl: "https://www.facebook.com/profile.php?id=61574611928823",
+        copyright: "© 2025 Everpeak P.H. All Rights Reserved."
+    }
+};
+
 // Check authentication on page load
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     // Check if staff is authenticated
     const staffSession = checkStaffAuth();
     if (!staffSession) return;
@@ -14,26 +37,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
-    // Rest of your existing code...
-    // Navigation
-    const designBtn = document.getElementById("designBtn");
-    const reservationBtn = document.getElementById("reservationBtn");
-    // ... rest of your existing code
-});
-document.addEventListener("DOMContentLoaded", () => {
     // Navigation
     const designBtn = document.getElementById("designBtn");
     const reservationBtn = document.getElementById("reservationBtn");
 
     if (designBtn) {
         designBtn.addEventListener("click", () => {
-            window.location.href = "/WEBSYS/FinalProj/AdminPanel/admin-design.html";
+            window.location.href = "admin-design.html";
         });
     }
 
     if (reservationBtn) {
         reservationBtn.addEventListener("click", () => {
-            window.location.href = "/WEBSYS/FinalProj/AdminPanel/admin-reservation.html";
+            window.location.href = "admin-reservation.html";
         });
     }
 
@@ -58,34 +74,46 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize file upload functionality
     initializeFileUploads();
     
-    // Load existing data
-    loadWebsiteData();
+    // Load existing data from Firebase
+    await loadFromFirebase();
     renderCarouselImages();
     renderGalleryImages();
 });
 
-// Global variables
-let websiteData = {
-    carousel: [],
-    gallery: [],
-    content: {
-        title: "Everpeak",
-        price: "Starts at ₱8,400.00/night",
-        tagline: "Your one step to tranquility 🌴",
-        location: "Purok 6, Pintong Bocaue, San Mateo Rizal, San Mateo, Philippines",
-        amenitiesLeft: "Mountain View\nSea of Clouds (Seasonal)\nStar Gazing (Seasonal)\nDipping Pool with Jacuzzi\nTable Tennis\nBingo\nGazebo",
-        amenitiesRight: "Unlimited Videoko\nUnlimited Wifi\nNetflix\nBilliards\nBluetooth Speakers\nTwo Pool Bed",
-        accessLeft: "Sofabed and Airbeds\nFour Camping Tent\n55\" TV for Netflix and Karaoke\nKitchenwares and Utensils\nRefrigerator\nNo Corkage Fee",
-        accessRight: "Free Use of Griller (bring own charcoal)\nToilet and Bathroom\nFully Functional Kitchen\nHot and Cold Water Dispenser\nDinnerwares\nFree One Gallon of Mineral Water",
-        transportation: "Bike, Motorcycle, Sedan, SUV"
-    },
-    footer: {
-        title: "Everpeak Philippines",
-        description: "Connects campers to campgrounds and stores, making every camping adventure seamless and memorable.",
-        facebookUrl: "https://www.facebook.com/profile.php?id=61574611928823",
-        copyright: "© 2025 Everpeak P.H. All Rights Reserved."
+// Enhanced website data management with Firebase
+async function saveToFirebase() {
+    try {
+        await db.collection('websiteData').doc('everpeakContent').set({
+            ...websiteData,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log('Data saved to Firebase');
+        return true;
+    } catch (error) {
+        console.error('Error saving to Firebase:', error);
+        // Fallback to localStorage
+        saveToLocalStorage();
+        return false;
     }
-};
+}
+
+async function loadFromFirebase() {
+    try {
+        const doc = await db.collection('websiteData').doc('everpeakContent').get();
+        if (doc.exists) {
+            const firebaseData = doc.data();
+            websiteData = { ...websiteData, ...firebaseData };
+            populateFormFields();
+            console.log('Data loaded from Firebase');
+        } else {
+            // Load from localStorage if no Firebase data
+            loadWebsiteData();
+        }
+    } catch (error) {
+        console.error('Error loading from Firebase:', error);
+        loadWebsiteData();
+    }
+}
 
 // Initialize file upload functionality
 function initializeFileUploads() {
@@ -136,7 +164,7 @@ function setupFileUpload(uploadArea, fileInput, type) {
     });
 }
 
-// Handle file upload
+// Handle file upload - store as base64 in Firestore
 function handleFileUpload(files, type) {
     if (files.length === 0) return;
     
@@ -157,17 +185,17 @@ function handleFileUpload(files, type) {
         const interval = setInterval(() => {
             progress += 10;
             progressBar.style.width = `${progress}%`;
-            progressText.textContent = `Uploading ${file.name}... ${progress}%`;
+            progressText.textContent = `Processing ${file.name}... ${progress}%`;
             
             if (progress >= 100) {
                 clearInterval(interval);
                 
                 // Convert image to base64 for storage
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     websiteData[type].push({
-                        url: e.target.result,
-                        alt: file.name.split('.')[0], // Use filename without extension as alt text
+                        url: e.target.result, // base64 string
+                        alt: file.name.split('.')[0],
                         filename: file.name
                     });
                     
@@ -180,7 +208,7 @@ function handleFileUpload(files, type) {
                     if (index === files.length - 1) {
                         progressContainer.style.display = 'none';
                         progressBar.style.width = '0%';
-                        saveToLocalStorage();
+                        await saveToFirebase();
                     }
                 };
                 reader.readAsDataURL(file);
@@ -261,7 +289,7 @@ function editImage(section, index) {
     document.getElementById('imageModal').style.display = 'flex';
     
     // Set up save button
-    document.getElementById('saveImageBtn').onclick = function() {
+    document.getElementById('saveImageBtn').onclick = async function() {
         const alt = document.getElementById('imageAlt').value;
         
         if (alt) {
@@ -271,7 +299,7 @@ function editImage(section, index) {
             } else {
                 renderGalleryImages();
             }
-            saveToLocalStorage();
+            await saveToFirebase();
             closeModal('imageModal');
         } else {
             alert('Please provide alt text for the image');
@@ -280,19 +308,21 @@ function editImage(section, index) {
 }
 
 // Remove image
-function removeImage(section, index) {
+async function removeImage(section, index) {
     if (confirm('Are you sure you want to remove this image?')) {
         websiteData[section].splice(index, 1);
+        
         if (section === 'carousel') {
             renderCarouselImages();
         } else {
             renderGalleryImages();
         }
-        saveToLocalStorage();
+        
+        await saveToFirebase();
     }
 }
 
-// Load website data from localStorage
+// Load website data from localStorage (fallback)
 function loadWebsiteData() {
     const storedData = localStorage.getItem('everpeakWebsiteData');
     if (storedData) {
@@ -305,25 +335,32 @@ function loadWebsiteData() {
 // Populate form fields with current data
 function populateFormFields() {
     // Content tab
-    document.getElementById('title').value = websiteData.content.title || '';
-    document.getElementById('price').value = websiteData.content.price || '';
-    document.getElementById('tagline').value = websiteData.content.tagline || '';
-    document.getElementById('location').value = websiteData.content.location || '';
-    document.getElementById('amenitiesLeft').value = websiteData.content.amenitiesLeft || '';
-    document.getElementById('amenitiesRight').value = websiteData.content.amenitiesRight || '';
-    document.getElementById('accessLeft').value = websiteData.content.accessLeft || '';
-    document.getElementById('accessRight').value = websiteData.content.accessRight || '';
-    document.getElementById('transportation').value = websiteData.content.transportation || '';
-    
-    // Footer tab
-    document.getElementById('footerTitle').value = websiteData.footer.title || '';
-    document.getElementById('footerDescription').value = websiteData.footer.description || '';
-    document.getElementById('facebookUrl').value = websiteData.footer.facebookUrl || '';
-    document.getElementById('copyright').value = websiteData.footer.copyright || '';
+    if (document.getElementById('title')) {
+        document.getElementById('title').value = websiteData.content.title || '';
+        document.getElementById('price').value = websiteData.content.price || '';
+        document.getElementById('tagline').value = websiteData.content.tagline || '';
+        document.getElementById('location').value = websiteData.content.location || '';
+        document.getElementById('amenitiesLeft').value = websiteData.content.amenitiesLeft || '';
+        document.getElementById('amenitiesRight').value = websiteData.content.amenitiesRight || '';
+        document.getElementById('accessLeft').value = websiteData.content.accessLeft || '';
+        document.getElementById('accessRight').value = websiteData.content.accessRight || '';
+        document.getElementById('transportation').value = websiteData.content.transportation || '';
+        
+        // Footer tab
+        document.getElementById('footerTitle').value = websiteData.footer.title || '';
+        document.getElementById('footerDescription').value = websiteData.footer.description || '';
+        document.getElementById('facebookUrl').value = websiteData.footer.facebookUrl || '';
+        document.getElementById('copyright').value = websiteData.footer.copyright || '';
+    }
 }
 
-// Save all changes
-window.saveAllChanges = function() {
+// Save to localStorage (fallback)
+function saveToLocalStorage() {
+    localStorage.setItem('everpeakWebsiteData', JSON.stringify(websiteData));
+}
+
+// Update saveAllChanges function
+window.saveAllChanges = async function() {
     // Update content data
     websiteData.content.title = document.getElementById('title').value;
     websiteData.content.price = document.getElementById('price').value;
@@ -341,21 +378,35 @@ window.saveAllChanges = function() {
     websiteData.footer.facebookUrl = document.getElementById('facebookUrl').value;
     websiteData.footer.copyright = document.getElementById('copyright').value;
     
-    saveToLocalStorage();
-    alert('All changes saved successfully!');
+    const success = await saveToFirebase();
+    if (success) {
+        alert('All changes saved successfully to Firebase!');
+    } else {
+        alert('Changes saved to local storage (Firebase unavailable)');
+    }
 };
-
-// Save to localStorage
-function saveToLocalStorage() {
-    localStorage.setItem('everpeakWebsiteData', JSON.stringify(websiteData));
-}
 
 // Close modal
 window.closeModal = function(modalId) {
     document.getElementById(modalId).style.display = 'none';
 };
 
-// Open modal (for compatibility)
-window.openModal = function() {
-    document.getElementById("imageModal").style.display = "flex";
-};
+// Setup tab navigation
+function setupTabNavigation() {
+    const tabs = document.querySelectorAll(".tab");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            tabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            tabContents.forEach(content => {
+                content.classList.remove("active");
+                if (content.id === `${tab.dataset.tab}-tab`) {
+                    content.classList.add("active");
+                }
+            });
+        });
+    });
+}
