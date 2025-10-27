@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase Connection Test - Everpeak</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .success { background: #4CAF50; color: white; padding: 20px; border-radius: 10px; margin: 10px 0; }
+        .error { background: #f44336; color: white; padding: 20px; border-radius: 10px; margin: 10px 0; }
+        .warning { background: #ff9800; color: white; padding: 20px; border-radius: 10px; margin: 10px 0; }
+        .test { background: #2196F3; color: white; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Firebase Connection Test</h1>
+    <p>This page tests if Firebase is properly connected to your Everpeak project.</p>
+
+    <div id="status"></div>
+    <div id="tests"></div>
+
+    <button onclick="runAllTests()">Run All Tests</button>
+    <button onclick="testFirestore()">Test Firestore Only</button>
+    <button onclick="testAuth()">Test Auth Only</button>
+    <button onclick="checkConsole()">Check Console</button>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Direct Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvvhMpf_WitusAfR-sqI8pMLIAPqygOOY",
+            authDomain: "everpeak-df533.firebaseapp.com",
+            projectId: "everpeak-df533",
+            storageBucket: "everpeak-df533.firebasestorage.app",
+            messagingSenderId: "314009845647",
+            appId: "1:314009845647:web:60381fba9cbecb51c395fa",
+            measurementId: "G-0XEXF5JSZ8"
+        };
+
+        let app, auth, db;
+
+        function initializeFirebase() {
+            const status = document.getElementById('status');
+            
+            try {
+                // Check if Firebase SDK is loaded
+                if (typeof firebase === 'undefined') {
+                    status.innerHTML = `<div class="error">❌ Firebase SDK not loaded. Check internet connection.</div>`;
+                    return false;
+                }
+
+                // Initialize Firebase
+                app = firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+
+                status.innerHTML = `<div class="success">✅ Firebase Initialized Successfully!</div>`;
+                console.log("✅ Firebase initialized:", app.options.projectId);
+                return true;
+
+            } catch (error) {
+                status.innerHTML = `<div class="error">❌ Firebase Initialization Failed: ${error.message}</div>`;
+                console.error("Firebase init error:", error);
+                return false;
+            }
+        }
+
+        async function testFirestore() {
+            const tests = document.getElementById('tests');
+            if (!db) {
+                tests.innerHTML += `<div class="error">❌ Firestore not initialized</div>`;
+                return;
+            }
+
+            try {
+                // Test write
+                await db.collection('connectionTests').doc('firestoreTest').set({
+                    test: 'Firestore connection test',
+                    timestamp: new Date(),
+                    project: 'everpeak-df533'
+                });
+
+                // Test read
+                const doc = await db.collection('connectionTests').doc('firestoreTest').get();
+                
+                tests.innerHTML += `<div class="success">
+                    ✅ Firestore Test PASSED!<br>
+                    • Write: ✅ Successful<br>
+                    • Read: ✅ Successful<br>
+                    • Project: everpeak-df533
+                </div>`;
+                
+                console.log("✅ Firestore test passed");
+
+            } catch (error) {
+                tests.innerHTML += `<div class="error">
+                    ❌ Firestore Test FAILED<br>
+                    • Error: ${error.message}<br>
+                    • Code: ${error.code}
+                </div>`;
+                console.error("Firestore test failed:", error);
+            }
+        }
+
+        async function testAuth() {
+            const tests = document.getElementById('tests');
+            if (!auth) {
+                tests.innerHTML += `<div class="error">❌ Auth not initialized</div>`;
+                return;
+            }
+
+            try {
+                // Just check if auth service is available
+                const user = auth.currentUser;
+                
+                tests.innerHTML += `<div class="success">
+                    ✅ Auth Service Test PASSED!<br>
+                    • Service: ✅ Available<br>
+                    • Current User: ${user ? user.email : 'None (expected)'}
+                </div>`;
+                
+                console.log("✅ Auth test passed");
+
+            } catch (error) {
+                tests.innerHTML += `<div class="error">
+                    ❌ Auth Test FAILED<br>
+                    • Error: ${error.message}
+                </div>`;
+                console.error("Auth test failed:", error);
+            }
+        }
+
+        function runAllTests() {
+            document.getElementById('tests').innerHTML = '';
+            console.clear();
+            console.log("🧪 Running all Firebase tests...");
+            
+            if (initializeFirebase()) {
+                setTimeout(() => testFirestore(), 1000);
+                setTimeout(() => testAuth(), 2000);
+            }
+        }
+
+        function checkConsole() {
+            console.log("=== CONSOLE CHECK ===");
+            console.log("Firebase:", typeof firebase);
+            console.log("App:", app);
+            console.log("Auth:", auth);
+            console.log("DB:", db);
+            console.log("Config:", firebaseConfig);
+            alert("Check browser console (F12) for detailed information");
+        }
+
+        // Auto-run tests on page load
+        setTimeout(runAllTests, 1000);
+    </script>
+</body>
+</html>
