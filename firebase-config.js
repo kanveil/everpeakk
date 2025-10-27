@@ -1,12 +1,11 @@
-// Firebase Configuration with Connection Testing
-console.log("🚀 Starting Firebase initialization...");
+// Firebase configuration for Everpeak Nature Camp
+console.log("Loading Firebase configuration...");
 
-// Check if Firebase SDK is loaded
+// Wait for Firebase to load
 if (typeof firebase === 'undefined') {
-    console.error("❌ CRITICAL: Firebase SDK not loaded!");
-    alert("Firebase SDK failed to load. Check your internet connection.");
+    console.error("Firebase SDK not loaded!");
 } else {
-    console.log("✅ Firebase SDK loaded successfully");
+    console.log("Firebase SDK found, initializing...");
     
     const firebaseConfig = {
         apiKey: "AIzaSyAvvhMpf_WitusAfR-sqI8pMLIAPqygOOY",
@@ -23,78 +22,27 @@ if (typeof firebase === 'undefined') {
         let app;
         if (!firebase.apps.length) {
             app = firebase.initializeApp(firebaseConfig);
-            console.log("✅ Firebase App Initialized");
+            console.log("✅ Firebase initialized successfully");
         } else {
             app = firebase.app();
-            console.log("✅ Firebase App Already Exists");
+            console.log("✅ Firebase already initialized");
         }
 
         // Initialize services
-        window.auth = firebase.auth();
-        window.db = firebase.firestore();
-        window.firebase = firebase;
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        console.log("🔥 SERVICES INITIALIZED:");
-        console.log("   - Auth:", typeof window.auth);
-        console.log("   - Firestore:", typeof window.db);
-        console.log("   - Project:", app.options.projectId);
+        // Export to global scope
+        window.auth = auth;
+        window.db = db;
+        window.firebaseApp = app;
 
-        // Test connection
-        testFirebaseConnection();
+        console.log("✅ Firebase services initialized:");
+        console.log("   - Auth:", typeof auth !== 'undefined');
+        console.log("   - Firestore:", typeof db !== 'undefined');
+        console.log("   - Project ID:", app.options.projectId);
 
     } catch (error) {
-        console.error("❌ Firebase Initialization Failed:", error);
-        alert("Firebase initialization failed: " + error.message);
+        console.error("❌ Firebase initialization failed:", error);
     }
 }
-
-// Test Firebase Connection
-async function testFirebaseConnection() {
-    console.log("🔍 Testing Firebase Connection...");
-    
-    const statusElement = document.getElementById('firebase-status');
-    
-    try {
-        // Test Firestore
-        await db.collection('connectionTests').doc('test').set({
-            timestamp: new Date(),
-            status: 'connected',
-            project: 'everpeak-df533'
-        }, { merge: true });
-        
-        // Test read
-        const doc = await db.collection('connectionTests').doc('test').get();
-        
-        console.log("🎉 FIREBASE CONNECTION SUCCESSFUL!");
-        console.log("   - Write: ✅ Successful");
-        console.log("   - Read: ✅ Successful");
-        console.log("   - Data:", doc.data());
-        
-        // Update status display
-        if (statusElement) {
-            statusElement.innerHTML = `
-                <div style="background: #4CAF50; color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <strong>✅ Firebase Connected!</strong>
-                    <br>Project: everpeak-df533
-                    <br>Services: Auth ✅ Firestore ✅
-                </div>
-            `;
-        }
-        
-    } catch (error) {
-        console.error("💥 FIREBASE CONNECTION FAILED:", error);
-        
-        if (statusElement) {
-            statusElement.innerHTML = `
-                <div style="background: #f44336; color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <strong>❌ Firebase Connection Failed</strong>
-                    <br>Error: ${error.message}
-                    <br>Code: ${error.code}
-                </div>
-            `;
-        }
-    }
-}
-
-// Make function globally available
-window.testFirebaseConnection = testFirebaseConnection;
