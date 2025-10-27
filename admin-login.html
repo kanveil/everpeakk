@@ -69,7 +69,25 @@ window.auth = auth;
 window.db = db;
 
 console.log("Firebase initialized successfully");
+    <script>
+// Debug helper
+console.log("Page loaded:", window.location.href);
+console.log("Firebase available:", typeof firebase !== 'undefined');
+console.log("Auth available:", typeof auth !== 'undefined');
+console.log("Firestore available:", typeof db !== 'undefined');
+
+// Global error handler
+window.addEventListener('error', function(e) {
+    console.error('Global error:', e.error);
+});
+
+// Check Firebase services
+if (typeof firebase !== 'undefined') {
+    console.log("Firebase apps:", firebase.apps.length);
+}
+</script>
 </script>
 </body>
 </html>
+
 
