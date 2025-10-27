@@ -1,0 +1,437 @@
+:root {
+    --bg-dark: #1e1e1e;
+    --bg-card: #2c2c2c;
+    --text-light: #f0f0f0;
+    --accent-gold: #e0a02d; 
+    --accent-hover: #f2b44a;
+    --border-dark: #444;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-light);
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    min-height: 100vh;
+}
+
+/* Navigation Bar */
+nav {
+    background: #111;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 20px;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+nav .logo {
+    font-size: 20px;
+    font-weight: bold;
+    flex-grow: 1;
+    text-align: center;
+    letter-spacing: 1px;
+}
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    left: 20px;
+}
+nav ul li {
+    display: inline;
+}
+nav ul li a {
+    color: var(--accent-gold);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: color 0.3s;
+}
+nav ul li a:hover { color: var(--accent-hover); }
+
+/* Steps (Styled as Dark HUDs/Cards) */
+.booking-container {
+    padding: 20px;
+}
+.step {
+    display: none;
+    margin: 20px auto;
+    /* Large Size for Step */
+    max-width: 800px; 
+    padding: 50px; 
+    border-radius: 12px;
+    background: var(--bg-card);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+    text-align: left;
+}
+.active { display: block; }
+.step h2 {
+    text-align: center;
+    color: var(--accent-gold);
+    margin-bottom: 20px;
+}
+
+/* --- Summary Display Styles --- */
+.summary-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 25px;
+    background: var(--bg-dark); 
+    border-radius: 8px;
+    overflow: hidden; 
+    border: 1px solid var(--border-dark);
+}
+
+.summary-item {
+    flex: 1;
+    padding: 10px 5px;
+    text-align: center;
+    border-right: 1px solid var(--border-dark);
+}
+
+.summary-item:last-child {
+    border-right: none;
+}
+
+/* Make Guests item clickable */
+.summary-item.clickable {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.summary-item.clickable:hover {
+    background: #444; 
+}
+
+
+.summary-item .icon {
+    font-size: 20px;
+    color: var(--accent-gold);
+    display: block;
+    margin-bottom: 3px;
+}
+
+.summary-item p {
+    font-size: 11px;
+    color: #bbb;
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: normal;
+}
+
+.summary-item span {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--text-light);
+}
+/* --- END Summary Display Styles --- */
+
+
+/* Form Elements */
+input, select {
+    display: block;
+    width: 100%; 
+    margin: 10px auto;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-dark);
+    background: var(--bg-dark);
+    color: var(--text-light);
+    font-size: 16px;
+    box-sizing: border-box; 
+}
+input::placeholder {
+    color: #888;
+}
+
+button {
+    cursor: pointer;
+    display: block;
+    width: 100%; 
+    margin: 15px auto;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    background: #555;
+    color: white;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+button:hover:not(.accent-btn) { background: #666; }
+
+/* Accent Button (Solaire Gold) */
+.accent-btn {
+    background: var(--accent-gold);
+    color: var(--bg-dark);
+    font-size: 18px;
+    margin-top: 25px;
+}
+.accent-btn:hover { background: var(--accent-hover); }
+
+/* Calendar Controls & Picker */
+.calendar-controls {
+    text-align: center;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%; 
+}
+.wide-controls {
+    justify-content: space-between;
+    width: 100%; 
+    max-width: none; 
+}
+.calendar-controls button {
+    width: auto;
+    padding: 8px 15px;
+    margin: 0 5px;
+}
+.month-label {
+    font-size: 20px;
+    color: var(--accent-gold);
+}
+
+
+/* --- Two-Month Calendar Layout --- */
+.calendars-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: none;
+    margin: 15px auto;
+    gap: 10px; 
+}
+
+/* Calendar Month Wrapper */
+.calendar-month {
+    flex: 1 1 50%;
+    padding: 0 5px; 
+}
+
+.calendar-month h3 {
+    text-align: center;
+    color: var(--accent-gold);
+    font-size: 18px;
+    margin-bottom: 10px;
+    margin-top: 0;
+}
+
+/* Calendar Table */
+.calendar {
+    margin: 0 auto; 
+    border-collapse: collapse;
+    width: 100%; 
+    background: #333;
+    border: 1px solid var(--border-dark);
+    table-layout: fixed; 
+}
+.calendar th, .calendar td {
+    border: 1px solid var(--border-dark);
+    padding: 5px 2px; 
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.2s;
+    height: 35px;
+    position: relative;
+    font-size: 14px;
+    vertical-align: middle; 
+}
+
+/* Date number style */
+.date-number {
+    display: block;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Override specific cell states for the new layout */
+.calendar th {
+    background: #222;
+    color: var(--accent-gold);
+    font-size: 10px; 
+    text-transform: uppercase;
+    padding: 8px 2px;
+}
+.calendar td:hover:not(.reserved) { 
+    background: #444; 
+}
+.reserved {
+    background: #111;
+    color: #666;
+    cursor: not-allowed;
+    pointer-events: none;
+    position: relative;
+}
+.reserved::after {
+    content: "X";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff5555;
+    font-weight: bold;
+}
+.selected { 
+    background: var(--accent-gold) !important;
+    color: var(--bg-dark) !important;
+    font-weight: bold;
+}
+.range-highlight {
+    background: rgba(224, 160, 45, 0.3) !important; /* Semi-transparent gold for range */
+}
+
+
+/* Selection and Payment Groups */
+.selection-group, .payment-group {
+    padding-top: 15px;
+    border-top: 1px solid var(--border-dark);
+    margin-top: 20px;
+}
+.selection-group select {
+    margin-bottom: 20px;
+}
+
+/* Total Amount Display (Solaire-Style Price Tag) */
+.total-amount {
+    text-align: right;
+    width: 100%; 
+    margin: 10px auto 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--text-light);
+    padding: 10px 0;
+    border-top: 1px solid var(--border-dark);
+    border-bottom: 1px solid var(--border-dark);
+}
+#totalAmount {
+    color: var(--accent-gold);
+    font-size: 24px;
+}
+
+/* Error Message Styling */
+.error {
+    color: #ff5555;
+    font-size: 0.95rem;
+    margin-top: 4px;
+    min-height: 1.1em;
+    width: 100%; 
+    margin-left: auto;
+    margin-right: auto;
+}
+input.error-field {
+    border-color: #ff5555;
+    box-shadow: 0 0 0 1px #ff5555;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    /* Small Size for Receipt Modal */
+    max-width: 450px; 
+    text-align: left;
+    color: var(--text-light);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Custom styles for the smaller Guest Modal */
+.guest-modal-content {
+    max-width: 350px !important; 
+    padding: 25px;
+    text-align: center !important;
+}
+
+/* Guest Counter Styles */
+.guest-counter {
+    text-align: left;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid var(--border-dark);
+    border-radius: 6px;
+}
+.guest-counter label {
+    display: block;
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 8px;
+}
+.counter-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.counter-controls .count-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--text-light);
+    flex-grow: 1;
+    text-align: left; 
+}
+.count-btn {
+    width: 30px !important;
+    height: 30px;
+    padding: 0;
+    margin: 0 5px 0 0 !important;
+    font-size: 20px;
+    line-height: 1;
+    border-radius: 50%; 
+    background: #555 !important;
+    color: var(--text-light) !important;
+}
+.count-btn:hover {
+    background: #777 !important;
+}
+.count-btn:disabled {
+    background: #333 !important;
+    color: #666 !important;
+    cursor: not-allowed;
+}
+
+.done-btn {
+    width: 100% !important;
+    margin-top: 20px !important;
+}
+
+.modal-header { 
+    font-weight: bold; 
+    margin-bottom: 15px; 
+    color: var(--accent-gold);
+    border-bottom: 1px solid var(--border-dark);
+    padding-bottom: 10px;
+}
+.modal-content p strong {
+    color: var(--accent-gold);
+}
+.close {
+    float: right;
+    cursor: pointer;
+    color: #ff5555;
+    font-size: 24px;
+    line-height: 1;
+}
+.close:hover {
+    color: red;
+}

@@ -1,0 +1,240 @@
+body, h1, h2, p {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  color: #e0e0e0;
+}
+
+body {
+  background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 10px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  font-size: 1.8em;
+  margin-bottom: 5px;
+  color: #ffffff;
+}
+
+.header h2 {
+  font-size: 1.2em;
+  font-weight: normal;
+  color: #cccccc;
+}
+
+.promo-container {
+  background: #1f1f1f;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 800px;
+  box-sizing: border-box;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.promo-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.7);
+}
+
+.promo-title {
+  color: #575353;
+  text-align: center;
+  font-size: 2.5em;
+  margin-bottom: 40px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.deals-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.promo-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.promo-group h3 {
+  text-align: center;
+  font-size: 1.1em;
+  margin-bottom: 5px;
+  color: #eeeeee;
+  font-weight: bold;
+}
+
+.price-box {
+  padding: 25px;
+  border-radius: 12px;
+  background: #2a2a2a;
+  box-shadow: 4px 4px 15px rgba(0,0,0,0.4);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.price-box:hover {
+  transform: scale(1.05);
+  box-shadow: 6px 6px 20px rgba(0,0,0,0.6);
+}
+
+.price-box h4 {
+  font-size: 1.4em;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.time-range {
+  font-size: 0.9em;
+  color: #aaaaaa;
+  margin-bottom: 10px;
+}
+
+.price-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #777777;
+  font-size: 0.9em;
+  margin-bottom: 2px;
+}
+
+.promo-price {
+  font-size: 2.5em;
+  font-weight: bold;
+  color: #ff6b6b;
+}
+
+.promo-price span {
+  font-size: 0.6em;
+  vertical-align: super;
+}
+
+.guest-limit {
+  font-size: 0.9em;
+  color: #bbbbbb;
+  margin-top: 10px;
+}
+
+.book-now-container {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.book-now-btn {
+  background: linear-gradient(90deg, #ff6b6b, #ff9966);
+  color: white;
+  border: none;
+  padding: 12px 35px;
+  font-size: 1.2em;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.book-now-btn:hover {
+  background: linear-gradient(90deg, #ff9966, #ff6b6b);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+}
+
+/* === Popup (receipt-style) === */
+.promo-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+  z-index: 1000;
+}
+
+.popup-box {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  animation: scaleUp 0.4s ease;
+  position: relative;
+}
+
+.popup-box h2 {
+  color: #ff6b6b;
+  margin-bottom: 10px;
+}
+
+.popup-box p {
+  color: #444;
+  font-size: 1em;
+  line-height: 1.5;
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #555;
+  transition: color 0.3s;
+}
+
+.close-btn:hover {
+  color: #ff6b6b;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes scaleUp {
+  from {transform: scale(0.85); opacity: 0;}
+  to {transform: scale(1); opacity: 1;}
+}
+
+@media (max-width: 650px) {
+  .deals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .promo-container {
+    padding: 20px;
+  }
+
+  .promo-title {
+    font-size: 1.5em;
+  }
+
+  .promo-group h3 {
+    margin-top: 15px;
+  }
+}

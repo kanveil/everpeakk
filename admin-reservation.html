@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Everpeak Admin Panel</title>
+    <link rel="stylesheet" href="admin-reservation.css">
+</head>
+<body>
+    <nav class="admin-nav">
+        <div class="logo">Everpeak Admin</div>
+        <ul>
+        <li><button id="designBtn" class="nav-btn">Design</button></li>
+        <li><button id="reservationBtn" class="nav-btn">Reservation</button></li>
+        </ul>
+
+    </nav>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Reservation Management</h1>
+            <div class="date-filter">
+                <select id="dateFilter">
+                    <option value="all">All Dates</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Total Reservations</h3>
+                <div class="value" id="totalReservations">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Confirmed</h3>
+                <div class="value" id="confirmedReservations">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Cancelled</h3>
+                <div class="value" id="cancelledReservations">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Revenue</h3>
+                <div class="value" id="totalRevenue">P0.00</div>
+            </div>
+        </div>
+
+        <div class="reservations-container">
+            <div class="reservations-header">
+                <h2>Recent Reservations</h2>
+                <div class="status-filter">
+                    <select id="statusFilter">
+                        <option value="all">All Status</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="reservationsTable">
+                <div class="empty-state">
+                    <h3>No Reservations Yet</h3>
+                    <p>When customers complete bookings, they will appear here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Cancel Reservation</h2>
+                <span class="close" onclick="closeModal('cancelModal')">&times;</span>
+            </div>
+            <p>Are you sure you want to cancel this reservation? This action cannot be undone and will free up the reserved dates.</p>
+            <div class="modal-actions">
+                <button class="action-btn cancel" id="confirmCancel">Yes, Cancel</button>
+                <button class="action-btn" onclick="closeModal('cancelModal')">No, Keep</button>
+            </div>
+        </div>
+    </div>
+    <script src="admin-reservation.js"></script>
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const designBtn = document.getElementById("designBtn");
+  const reservationBtn = document.getElementById("reservationBtn");
+
+  if (designBtn) {
+    designBtn.addEventListener("click", () => {
+      window.location.href = "admin-design.html";
+    });
+  }
+
+  if (reservationBtn) {
+    reservationBtn.addEventListener("click", () => {
+      window.location.href = "admin-reservation.html";
+    });
+  }
+});
+</script>
+
+</body>
+</html>

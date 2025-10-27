@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Everpeak Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="admin-design.css">
+</head>
+<body>
+    <nav class="admin-nav">
+        <div class="logo">Everpeak Admin </div>
+        <ul>
+        <li><button id="designBtn" class="nav-btn active">Design</button></li>
+        <li><button id="reservationBtn" class="nav-btn">Reservation</button></li>
+        <li><button id="logoutBtn" class="nav-btn">Logout</button></li>
+        </ul>
+    </nav>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Website Content Management</h1>
+            <button class="btn btn-primary" onclick="saveAllChanges()">Save All Changes</button>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="carousel">Carousel</div>
+            <div class="tab" data-tab="gallery">Gallery</div>
+            <div class="tab" data-tab="content">Content</div>
+            <div class="tab" data-tab="footer">Footer</div>
+        </div>
+
+        <!-- Carousel Tab -->
+        <div id="carousel-tab" class="tab-content active">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Carousel Images</h2>
+                </div>
+                
+                <div class="file-upload-area" id="carouselUploadArea">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <p>Click or drag images here to upload</p>
+                    <p class="small">Recommended: 1200x500px or similar aspect ratio</p>
+                    <input type="file" id="carouselFileInput" class="file-input" accept="image/*" multiple>
+                </div>
+                
+                <div class="upload-progress" id="carouselProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="carouselProgressFill"></div>
+                    </div>
+                    <p class="small text-center mt-1" id="carouselProgressText">Uploading...</p>
+                </div>
+                
+                <div class="image-grid" id="carouselImages">
+                    <!-- Carousel images will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery Tab -->
+        <div id="gallery-tab" class="tab-content">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Gallery Images</h2>
+                </div>
+                
+                <div class="file-upload-area" id="galleryUploadArea">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <p>Click or drag images here to upload</p>
+                    <p class="small">Recommended: 800x600px or similar aspect ratio</p>
+                    <input type="file" id="galleryFileInput" class="file-input" accept="image/*" multiple>
+                </div>
+                
+                <div class="upload-progress" id="galleryProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="galleryProgressFill"></div>
+                    </div>
+                    <p class="small text-center mt-1" id="galleryProgressText">Uploading...</p>
+                </div>
+                
+                <div class="image-grid" id="galleryImages">
+                    <!-- Gallery images will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Tab -->
+        <div id="content-tab" class="tab-content">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Main Content</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" class="form-control" placeholder="Everpeak">
+                </div>
+                
+                <div class="form-group">
+                    <label for="price">Price</label>
+                    <input type="text" id="price" class="form-control" placeholder="Starts at ₱8,400.00/night">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tagline">Tagline</label>
+                    <input type="text" id="tagline" class="form-control" placeholder="Your one step to tranquility 🌴">
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" class="form-control" placeholder="Purok 6, Pintong Bocaue, San Mateo Rizal, San Mateo, Philippines">
+                </div>
+            </div>
+            
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Amenities</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label for="amenitiesLeft">Left Column Amenities (one per line)</label>
+                    <textarea id="amenitiesLeft" class="form-control" placeholder="Mountain View&#10;Sea of Clouds (Seasonal)&#10;Star Gazing (Seasonal)"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="amenitiesRight">Right Column Amenities (one per line)</label>
+                    <textarea id="amenitiesRight" class="form-control" placeholder="Unlimited Videoko&#10;Unlimited Wifi&#10;Netflix"></textarea>
+                </div>
+            </div>
+            
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Accessibilities</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label for="accessLeft">Left Column Accessibilities (one per line)</label>
+                    <textarea id="accessLeft" class="form-control" placeholder="Sofabed and Airbeds&#10;Four Camping Tent&#10;55&quot; TV for Netflix and Karaoke"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="accessRight">Right Column Accessibilities (one per line)</label>
+                    <textarea id="accessRight" class="form-control" placeholder="Free Use of Griller (bring own charcoal)&#10;Toilet and Bathroom&#10;Fully Functional Kitchen"></textarea>
+                </div>
+            </div>
+            
