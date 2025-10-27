@@ -498,5 +498,34 @@ document.addEventListener("DOMContentLoaded", () => {
     updateSummaryDisplay();
     updateGuestButtonStates();
 });
+async function saveBookingToFirebase(bookingData) {
+    try {
+        console.log("Saving booking to Firebase...");
+        
+        const docRef = await db.collection('bookings').add({
+            ...bookingData,
+            status: 'confirmed',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            totalGuests: guestCount.adults + guestCount.children
+        });
+        
+        console.log("Booking saved with ID:", docRef.id);
+        
+        // Also save to reservations collection for admin
+        await db.collection('reservations').add({
+            ...bookingData,
+            id: docRef.id,
+            status: 'confirmed',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            totalGuests: guestCount.adults + guestCount.children
+        });
+        
+        return docRef.id;
+    } catch (error) {
+        console.error('Error saving booking to Firebase:', error);
+        throw error;
+    }
+}
 
 document.getElementById("stayType").addEventListener("change", updateDisplay);
+
