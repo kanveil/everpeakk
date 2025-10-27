@@ -1,7 +1,7 @@
-// Firebase configuration
+// Firebase configuration for Everpeak Nature Camp
 const firebaseConfig = {
     apiKey: "AIzaSyAvvhMpf_WitusAfR-sqI8pMLIAPqygOOY",
-    authDomain: "everpeak-df533.firebaseapp.com",   
+    authDomain: "everpeak-df533.firebaseapp.com",
     projectId: "everpeak-df533",
     storageBucket: "everpeak-df533.firebasestorage.app",
     messagingSenderId: "314009845647",
@@ -19,4 +19,4 @@ window.firebase = firebase;
 window.auth = auth;
 window.db = db;
 
-console.log("Firebase initialized successfully");
+console.log("Firebase initialized successfully for Everpeak Nature Camp");
